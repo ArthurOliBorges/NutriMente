@@ -52,6 +52,10 @@ Git e GitHub para versionamento e colaboração.
 
 Boas práticas de acessibilidade e responsividade.
 
+# Links Externos
+
+https://arthuroliborges.github.io/NutriMente
+
 # Equipe de Desenvolvimento
 
 Arthur de Oliveira Borges
