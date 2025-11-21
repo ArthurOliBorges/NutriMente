@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nutrimente - Clínica de Psicologia Nutricional</title>
+  <meta name="description"
+    content="Clínica de Psicologia Nutricional que une acolhimento e ciência para promover saúde mental e bem-estar.">
+
+  <style>
+    .tipo-btn { 
+      background: #57C441;
+      padding: .5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .3s;
+    }
+    .tipo-btn:hover {
+      background: #4eb13a;
+      
+    }
+    .logo-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --accent: #255bd9;
+      --accent-green: #57C441;
+      --text: #102C6F;
+      --subtext: #555;
+      --radius: 12px;
+      font-family: "Inter", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: var(--accent);
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: relative;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 600;
+      transition: opacity .3s;
+    }
+
+    nav a:hover {
+      opacity: 0.8;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+
+    .login-btn {
+      background: var(--accent-green);
+      color: #fff;
+      padding: .5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .3s;
+    }
+
+    .login-btn:hover {
+      background: #4eb13a;
+    }
+
+    /* ===== USER MENU ===== */
+    .user-menu {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--accent);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      right: 0;
+      top: 45px;
+      background: var(--card);
+      border: 1px solid #e0e6f1;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: none;
+      flex-direction: column;
+      min-width: 140px;
+      z-index: 999;
+    }
+
+    .user-dropdown button {
+      background: none;
+      border: none;
+      padding: .8rem 1rem;
+      text-align: left;
+      font-size: .95rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .user-dropdown button:hover {
+      background: var(--bg);
+    }
+
+    .user-menu.active .user-dropdown {
+      display: flex;
+    }
+
+    /* ===== MODAL ===== */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      position: relative;
+      animation: fadeIn .3s ease;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 0.8rem;
+      border-radius: var(--radius);
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .modal-content p {
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .modal-content span {
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #555;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      nav {
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background: var(--accent);
+        display: none;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      nav a {
+        margin: 1rem 0;
+        text-align: center;
+      }
+    }
+
+    section {
+      max-width: 1100px;
+      margin: 2.5rem auto;
+      padding: 1rem 2rem;
+    }
+
+    h2 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+      border-left: 6px solid var(--accent-green);
+      padding-left: .5rem;
+      font-size: 1.5rem;
+    }
+
+    /* ===== SERVICES & TEAM ===== */
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .service {
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid #e0e6f1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== AGENDA ===== */
+    .agenda-wrapper {
+      max-width: 500px;
+      background: var(--card);
+      padding: 2rem;
+      border-radius: var(--radius);
+      border: 1px solid #e0e6f1;
+      margin-top: 1.5rem;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: .3rem;
+      display: block;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: .75rem;
+      border-radius: var(--radius);
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      margin-bottom: .5rem;
+    }
+
+    .horarios-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: .6rem;
+      margin: 1rem 0;
+    }
+
+    .horario-btn {
+      padding: .8rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--accent);
+      background: var(--bg);
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .horario-btn.selecionado {
+      background: var(--accent-green);
+      color: #fff;
+      border-color: var(--accent-green);
+    }
+
+    .horario-btn.reservado {
+      background: #e0e0e0;
+      color: #888;
+      border-color: #bbb;
+      cursor: not-allowed;
+    }
+
+    .meus-agendamentos {
+      margin-top: 2rem;
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid #e0e6f1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .cancelar-btn {
+      background: #f44336;
+      color: #fff;
+      border: none;
+      padding: .3rem .6rem;
+      border-radius: 6px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    footer {
+      background: var(--accent);
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
+      font-size: 0.95rem;
+    }
+
+    footer a {
+      color: var(--accent-green);
+      text-decoration: none;
+      font-weight: 600;
+    }
+      
+  </style>
+</head>
+
+<body>
+  <header>
+    <a class="brand" href="#">
+      <img src="img/LogoNutrimente.png" alt="Logo Nutrimente" class="logo-img">
+      Nutrimente
+    </a>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <nav id="menuNav">
+      <a href="#oque">O que é?</a>
+      <a href="#equipe">Equipe</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#agendamento">Agendamento</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <button class="login-btn" id="abrirLogin">Login</button>
+  </header>
+
+  <!-- O que é -->
+    <section id="oque">
+    <h2>O que é Psicologia Nutricional?</h2>
+
+    <div class="oque-container" style="display: flex; align-items: center; gap:1.5rem;">
+      <p style="flex: 1;">
+        A Psicologia Nutricional compreende a interação entre mente e alimentação, ajudando você a entender emoções,
+        hábitos e comportamentos alimentares, promovendo equilíbrio entre corpo e mente.
+      </p>
+
+      <img src="img/doutor.png.png" alt="Psicologia Nutricional"
+          style="height: 100%; max-height: 300px; object-fit: cover;">
+    </div>
+  </section>
+
+
+
+
+  <!-- Serviços -->
+  <section id="servicos">
+    <h2>Serviços</h2>
+    <div class="services">
+      <div class="service">
+        <h3>Psicologia Nutricional</h3>
+        <p>Entenda sua relação com a comida e promova uma alimentação consciente.</p>
+      </div>
+      <div class="service">
+        <h3>Psicoterapia Individual</h3>
+        <p>Atendimento personalizado para autoconhecimento e equilíbrio emocional.</p>
+      </div>
+      <div class="service">
+        <h3>Terapia de Casal</h3>
+        <p>Fortaleça vínculos e melhore a comunicação com apoio profissional.</p>
+      </div>
+    </div>
+        <!-- Top Profissionais -->
+
+  <section id="top-profissionais">
+    <h2>Top Profissionais</h2>
+    <div class="services">
+      <div class="service">
+        <h3>👩‍⚕️ Dra. Mariana Souza</h3>
+        <p>Especialista em Psicologia Clínica e Nutricional, com foco em saúde mental integrada.</p>
+        <button class="tipo-btn" onclick="window.location.href='Mariana.html'">Ver perfil</button>
+      </div>
+      <div class="service">
+        <h3>👨‍⚕️ Dr. Lucas Fernandes</h3>
+        <p>Nutricionista comportamental e consultor em hábitos alimentares saudáveis.</p>
+        <button class="tipo-btn" onclick="window.location.href='Mariana.html'">Ver perfil</button>
+      </div>
+      <div class="service">
+        <h3>👩‍⚕️ Dra. Fernanda Lima</h3>
+        <p>Psicóloga especialista em Terapia Cognitivo-Comportamental e gestão emocional.</p>
+        <button class="tipo-btn" onclick="window.location.href='Mariana.html'">Ver perfil</button>
+      </div>
+    </div>
+  </section>
+
+
+  </section>
+
+  <!-- Agendamento -->
+  <section id="agendamento">
+    <h2>Agende sua consulta</h2>
+    <div class="agenda-wrapper">
+      <label for="data">Selecione a data:</label>
+      <input type="date" id="data">
+      <div class="horarios-container">
+        <button class="horario-btn" data-hora="08:00">08:00</button>
+        <button class="horario-btn" data-hora="09:00">09:00</button>
+        <button class="horario-btn" data-hora="10:00">10:00</button>
+        <button class="horario-btn" data-hora="14:00">14:00</button>
+        <button class="horario-btn" data-hora="15:00">15:00</button>
+      </div>
+      <form class="form-agenda">
+        <label>Nome:</label><input id="nome" type="text" required>
+        <label>Email:</label><input id="email" type="email" required>
+        <label>Telefone:</label><input id="telefone" type="tel" required>
+        <button class="login-btn" type="submit">Confirmar agendamento</button>
+      </form>
+    </div>
+    <div class="meus-agendamentos" id="meusAgendamentos" style="display:none;">
+      <h3>Meus agendamentos</h3>
+      <div id="listaAgendamentos"></div>
+    </div>
+  </section>
+
+  <!-- Modal de Login -->
+  <div class="modal" id="modalLogin">
+    <div class="modal-content">
+      <button id="fecharModal" class="modal-close">×</button>
+      <h2 id="tituloLogin">Entrar</h2>
+
+      <div id="formLogin">
+        <input type="email" id="loginEmail" placeholder="Email" required><br>
+        <input type="password" id="loginSenha" placeholder="Senha" required><br>
+        <button id="btnLogin" class="login-btn" style="width:100%;">Entrar</button>
+        <p>Ainda não tem conta?
+          <span id="mostrarCadastro">Cadastre-se</span>
+        </p>
+      </div>
+
+      <div id="formCadastro" style="display:none;">
+  <h3 style="margin-bottom: .5rem;">Você é:</h3>
+  
+  <div style="display:flex; gap:10px; margin-bottom:1rem;">
+    <button type="button" class="tipo-btn" data-tipo="cliente"
+      style="flex:1; padding:.7rem; border-radius:8px; border:2px solid var(--accent); background:#fff; cursor:pointer;">
+      Cliente
+    </button>
+    <button type="button" class="tipo-btn" data-tipo="profissional"
+      onclick="window.location.href='profissional.html'"
+      style="flex:1; padding:.7rem; border-radius:8px; border:2px solid var(--accent); background:#fff; cursor:pointer;">
+      Profissional
+    </button>
+
+  </div>
+
+  <input type="text" id="cadastroNome" placeholder="Nome completo" required><br>
+  <input type="email" id="cadastroEmail" placeholder="Email" required><br>
+  <input type="password" id="cadastroSenha" placeholder="Senha" required><br>
+
+  <button id="btnCadastro" class="login-btn" style="width:100%;">Cadastrar</button>
+
+  <p>Já tem conta?
+    <span id="mostrarLogin">Entrar</span>
+  </p>
+</div>
+
+    </div>
+  </div>
+
+  <footer id="contato">
+    <p>©️ 2025 Nutrimente. Todos os direitos reservados.</p>
+    <p>Contato: <a href="mailto:contato@nutrimente.com.br">contato@nutrimente.com.br</a></p>
+  </footer>
+
+<script>
+  // MENU HAMBURGUER
+  const menuToggle = document.getElementById('menuToggle');
+  const menuNav = document.getElementById('menuNav');
+  menuToggle.onclick = () => menuNav.classList.toggle('active');
+
+  // MODAL LOGIN
+  const modal = document.getElementById('modalLogin');
+  const abrir = document.getElementById('abrirLogin');
+  const fechar = document.getElementById('fecharModal');
+  const formLogin = document.getElementById('formLogin');
+  const formCadastro = document.getElementById('formCadastro');
+  const mostrarCadastro = document.getElementById('mostrarCadastro');
+  const mostrarLogin = document.getElementById('mostrarLogin');
+  const titulo = document.getElementById('tituloLogin');
+  const listaAgendamentos = document.getElementById('listaAgendamentos');
+  const boxAgendamentos = document.getElementById('meusAgendamentos');
+
+  let usuarioAtual = JSON.parse(localStorage.getItem('usuarioLogado') || 'null');
+
+  abrir.onclick = () => modal.style.display = 'flex';
+  fechar.onclick = () => modal.style.display = 'none';
+  mostrarCadastro.onclick = () => { formLogin.style.display = 'none'; formCadastro.style.display = 'block'; titulo.textContent = 'Cadastro'; };
+  mostrarLogin.onclick = () => { formLogin.style.display = 'block'; formCadastro.style.display = 'none'; titulo.textContent = 'Entrar'; };
+
+  // 🔎 Funções de validação
+  function validarEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function validarSenha(senha) {
+    return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(senha);
+  }
+
+  function validarNome(nome) {
+    return /^[A-Za-zÀ-ÿ\s]{3,}$/.test(nome);
+  }
+
+  function validarTelefone(tel) {
+    return /^(\(?\d{2}\)?\s?)?\d{4,5}-?\d{4}$/.test(tel);
+  }
+
+  function mostrarErro(msg) {
+    alert("⚠️ " + msg);
+  }
+
+  // CADASTRO
+  document.getElementById('btnCadastro').onclick = () => {
+    const nome = cadastroNome.value.trim();
+    const email = cadastroEmail.value.trim();
+    const senha = cadastroSenha.value;
+
+    if (!validarNome(nome)) return mostrarErro('Digite um nome válido (mínimo 3 letras).');
+    if (!validarEmail(email)) return mostrarErro('Digite um email válido.');
+    if (!validarSenha(senha)) return mostrarErro('A senha deve ter ao menos 6 caracteres, incluindo letras e números.');
+
+    let users = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    if (users.find(u => u.email === email)) return mostrarErro('Email já cadastrado!');
+
+    users.push({ nome, email, senha, agendamentos: [] });
+    localStorage.setItem('usuarios', JSON.stringify(users));
+
+    alert('✅ Cadastro realizado! Faça login.');
+    formCadastro.style.display = 'none';
+    formLogin.style.display = 'block';
+    titulo.textContent = 'Entrar';
+  };
+
+  // LOGIN
+  document.getElementById('btnLogin').onclick = () => {
+    const email = loginEmail.value.trim(), senha = loginSenha.value;
+    if (!validarEmail(email)) return mostrarErro('Email inválido.');
+    if (senha.length < 1) return mostrarErro('Digite sua senha.');
+
+    const users = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const user = users.find(u => u.email === email && u.senha === senha);
+    if (!user) return mostrarErro('Credenciais inválidas.');
+    usuarioAtual = user;
+    localStorage.setItem('usuarioLogado', JSON.stringify(user));
+    modal.style.display = 'none';
+    atualizarSaudacao();
+  };
+
+  // SAUDAÇÃO E LOGOUT
+  function atualizarSaudacao() {
+    const existente = document.querySelector('.user-menu');
+    if (existente) existente.remove();
+
+    if (usuarioAtual) {
+      abrir.style.display = 'none';
+      const userMenu = document.createElement('div');
+      userMenu.className = 'user-menu';
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = usuarioAtual.nome.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+      const name = document.createElement('span');
+      name.textContent = usuarioAtual.nome.split(' ')[0] + ' ▾';
+      const dropdown = document.createElement('div');
+      dropdown.className = 'user-dropdown';
+      const sairBtn = document.createElement('button');
+      sairBtn.textContent = 'Sair';
+      sairBtn.onclick = () => {
+        localStorage.removeItem('usuarioLogado');
+        usuarioAtual = null;
+        userMenu.remove();
+        abrir.style.display = 'inline-block';
+        boxAgendamentos.style.display = 'none';
+      };
+      dropdown.appendChild(sairBtn);
+      userMenu.appendChild(avatar);
+      userMenu.appendChild(name);
+      userMenu.appendChild(dropdown);
+      document.querySelector('header').appendChild(userMenu);
+      userMenu.onclick = () => userMenu.classList.toggle('active');
+      carregarAgendamentos();
+    } else {
+      abrir.style.display = 'inline-block';
+      boxAgendamentos.style.display = 'none';
+    }
+  }
+
+  // AGENDA
+  const horarios = document.querySelectorAll('.horario-btn');
+  horarios.forEach(btn => btn.onclick = () => {
+    if (btn.classList.contains('reservado')) return;
+    horarios.forEach(b => b.classList.remove('selecionado'));
+    btn.classList.add('selecionado');
+  });
+
+  document.querySelector('.form-agenda').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!usuarioAtual) return mostrarErro('Faça login para agendar.');
+
+    const data = document.getElementById('data').value;
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const horarioSelecionado = document.querySelector('.horario-btn.selecionado');
+
+    if (!data) return mostrarErro('Selecione uma data.');
+    if (new Date(data) < new Date().setHours(0, 0, 0, 0)) return mostrarErro('Selecione uma data futura.');
+    if (!horarioSelecionado) return mostrarErro('Escolha um horário.');
+    if (!validarNome(nome)) return mostrarErro('Nome inválido.');
+    if (!validarEmail(email)) return mostrarErro('Email inválido.');
+    if (!validarTelefone(telefone)) return mostrarErro('Telefone inválido. Ex: (11) 98765-4321');
+
+    const agendamento = { data, hora: horarioSelecionado.dataset.hora, nome, email, telefone };
+    let users = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const idx = users.findIndex(u => u.email === usuarioAtual.email);
+    if (idx !== -1) {
+      users[idx].agendamentos.push(agendamento);
+      usuarioAtual = users[idx];
+      localStorage.setItem('usuarios', JSON.stringify(users));
+      localStorage.setItem('usuarioLogado', JSON.stringify(usuarioAtual));
+    }
+
+    alert('✅ Agendamento confirmado!');
+    e.target.reset();
+    horarios.forEach(b => b.classList.remove('selecionado'));
+    carregarAgendamentos();
+  });
+
+  function carregarAgendamentos() {
+    if (!usuarioAtual?.agendamentos?.length) {
+      boxAgendamentos.style.display = 'none';
+      return;
+    }
+    boxAgendamentos.style.display = 'block';
+    listaAgendamentos.innerHTML = '';
+    usuarioAtual.agendamentos.forEach((a, i) => {
+      const item = document.createElement('div');
+      item.innerHTML = `📅 ${a.data} às ${a.hora} — ${a.nome} (${a.telefone})
+        <button class="cancelar-btn" data-index="${i}">Cancelar</button>`;
+      listaAgendamentos.appendChild(item);
+    });
+    document.querySelectorAll('.cancelar-btn').forEach(btn => {
+      btn.onclick = () => {
+        if (confirm('Deseja realmente cancelar este agendamento?')) {
+          const idx = +btn.dataset.index;
+          usuarioAtual.agendamentos.splice(idx, 1);
+          let users = JSON.parse(localStorage.getItem('usuarios') || '[]');
+          const uidx = users.findIndex(u => u.email === usuarioAtual.email);
+          if (uidx !== -1) users[uidx] = usuarioAtual;
+          localStorage.setItem('usuarios', JSON.stringify(users));
+          localStorage.setItem('usuarioLogado', JSON.stringify(usuarioAtual));
+          carregarAgendamentos();
+        }
+      };
+    });
+  }
+
+  atualizarSaudacao();
+</script>
+
+</body>
+
+</html>

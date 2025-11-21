@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #e9f4fb;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Caixa do chat */
+  .chat-container {
+    width: 400px;
+    height: 550px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    overflow: hidden;
+  }
+
+  /* Topo */
+  .chat-header {
+    background: #1c63d5;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* Mensagens */
+  .chat-body {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f4f8ff;
+  }
+
+  .msg {
+    padding: 10px 14px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    max-width: 80%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .msg.user {
+    background: #d8e9ff;
+    align-self: flex-end;
+  }
+
+  /* Área de envio */
+  .chat-footer {
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    background: white;
+    border-top: 1px solid #ccc;
+  }
+
+  .chat-footer input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #aaa;
+    font-size: 15px;
+  }
+
+  .chat-footer button {
+    background: #1c63d5;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .chat-footer button:hover {
+    background: #0e4fb1;
+  }
+
+  body {
+  font-family: Arial, sans-serif;
+  background: #e9f4fb;
+  margin: 0;
+  padding: 0;
+  position:relative;
+  min-height: 100vh;
+}
+
+</style>
+</head>
+<body>
+  <!-- Imagem grande -->
+  <img src="img/consulta.png" alt="consulta" 
+       style="
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         width: 70%;       /* tamanho menor */
+         max-width: 900px;
+         height: auto;
+         border-radius: 12px;
+         box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+         z-index: 1;
+       ">
+
+  <!-- Chat -->
+  <div class="chat-container" style="position: fixed; bottom: 30px; right: 30px; z-index: 2;">
+    <div class="chat-header">💬 Suporte</div>
+
+    <div class="chat-body" id="chatBody">
+      <!-- Mensagens aparecem aqui -->
+    </div>
+
+    <div class="chat-footer">
+      <input type="text" id="msgInput" placeholder="Digite sua mensagem...">
+      <button onclick="enviarMsg()">Enviar</button>
+    </div>
+  </div>
+</body>
+
+<script>
+function enviarMsg() {
+  const input = document.getElementById("msgInput");
+  const texto = input.value.trim();
+  if (texto === "") return;
+
+  const chat = document.getElementById("chatBody");
+
+  // mensagem do usuário
+  const msgUser = document.createElement("div");
+  msgUser.className = "msg user";
+  msgUser.textContent = texto;
+  chat.appendChild(msgUser);
+
+  // limpa input
+  input.value = "";
+
+  // scroll vai para baixo automaticamente
+  chat.scrollTop = chat.scrollHeight;
+
+  // resposta automática
+  setTimeout(() => {
+    const msgBot = document.createElement("div");
+    msgBot.className = "msg";
+    msgBot.textContent = "  Olá! Já estamos verificando.";
+    chat.appendChild(msgBot);
+    chat.scrollTop = chat.scrollHeight;
+  }, 600);
+}
+</script>
+
+</body>
+</html>
