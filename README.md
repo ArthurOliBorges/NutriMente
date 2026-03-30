@@ -66,11 +66,7 @@ Gabriel Benatto Alencar Stolses
 
 Gabriely Benito Monteiro
 
-Helder Virissio Araujo
-
-Kayke Alencar Silva
-
-Vitor Antônio Romualdo
+Vitor Antonio Romualdo
 
 # Orientadores
 
