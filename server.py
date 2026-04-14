@@ -8,13 +8,15 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+import os
+
+PORT = int(os.environ.get("PORT", 8000))
 
 
 BASE_DIR = Path(__file__).resolve().parent
 APP_DIR = BASE_DIR.parent
 DB_PATH = BASE_DIR / "nutrimente.db"
-HOST = "127.0.0.1"
-PORT = 8000
+HOST = "0.0.0.0"
 
 AVAILABLE_SLOTS = ["08:00", "09:00", "10:00", "14:00", "15:00", "16:00"]
 SERVICES = {
