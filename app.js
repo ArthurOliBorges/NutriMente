@@ -1,310 +1,635 @@
-:root {
-  --bg: #eef4ff;
-  --surface: rgba(255, 255, 255, 0.92);
-  --surface-strong: #ffffff;
-  --line: rgba(22, 81, 170, 0.14);
-  --text: #143a84;
-  --muted: #45608d;
-  --brand: #1651aa;
-  --brand-deep: #0f3f88;
-  --accent: #76ff03;
-  --accent-soft: rgba(118, 255, 3, 0.16);
-  --danger: #c84444;
-  --shadow: 0 22px 60px rgba(22, 81, 170, 0.16);
-  --radius-xl: 30px;
-  --radius-lg: 22px;
-  --radius-md: 16px;
-  --radius-sm: 12px;
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-body: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+const API_BASE = window.NUTRIMENTE_API_URL
+  || (window.location.protocol.startsWith("http") ? `${window.location.origin}/api` : "http://127.0.0.1:8000/api");
+const SESSION_KEY = "nutrimente_session_token";
+
+const state = {
+  user: null,
+  professionals: [],
+  services: {},
+  modes: {},
+  selectedSlot: "",
+  appointments: [],
+};
+
+const elements = {
+  menuToggle: document.getElementById("menuToggle"),
+  menuNav: document.getElementById("menuNav"),
+  authModal: document.getElementById("authModal"),
+  openAuthModal: document.getElementById("openAuthModal"),
+  closeAuthModal: document.getElementById("closeAuthModal"),
+  tabLogin: document.getElementById("tabLogin"),
+  tabRegister: document.getElementById("tabRegister"),
+  loginForm: document.getElementById("loginForm"),
+  registerForm: document.getElementById("registerForm"),
+  registerRole: document.getElementById("registerRole"),
+  roleButtons: Array.from(document.querySelectorAll(".segment-btn")),
+  professionalFields: document.getElementById("professionalFields"),
+  dashboardSection: document.getElementById("dashboardSection"),
+  dashboardShortcut: document.getElementById("dashboardShortcut"),
+  appointmentsList: document.getElementById("appointmentsList"),
+  professionalsGrid: document.getElementById("professionalsGrid"),
+  professionalId: document.getElementById("professionalId"),
+  serviceSelect: document.getElementById("serviceSelect"),
+  modeSelect: document.getElementById("modeSelect"),
+  appointmentDate: document.getElementById("appointmentDate"),
+  slotsGrid: document.getElementById("slotsGrid"),
+  bookingForm: document.getElementById("bookingForm"),
+  bookingSummary: document.getElementById("bookingSummary"),
+  patientName: document.getElementById("patientName"),
+  patientEmail: document.getElementById("patientEmail"),
+  patientPhone: document.getElementById("patientPhone"),
+  appointmentNotes: document.getElementById("appointmentNotes"),
+  videoModal: document.getElementById("videoModal"),
+  closeVideoModal: document.getElementById("closeVideoModal"),
+  videoShell: document.getElementById("videoShell"),
+  toastStack: document.getElementById("toastStack"),
+};
+
+function getSessionToken() {
+  return sessionStorage.getItem(SESSION_KEY);
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  min-height: 100vh;
-  color: var(--text);
-  font-family: var(--font-body);
-  background:
-    radial-gradient(circle at top left, rgba(22, 81, 170, 0.2), transparent 24rem),
-    radial-gradient(circle at top right, rgba(118, 255, 3, 0.18), transparent 22rem),
-    linear-gradient(180deg, #f4f8ff 0%, #edf4ff 50%, #e3eeff 100%);
+function setSessionToken(token) {
+  if (token) {
+    sessionStorage.setItem(SESSION_KEY, token);
+    return;
+  }
+  sessionStorage.removeItem(SESSION_KEY);
 }
 
-a, button, input, select { font: inherit; }
-button { cursor: pointer; }
-a { color: inherit; text-decoration: none; }
-input, select {
-  width: 100%;
-  padding: 0.95rem 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  color: var(--text);
-}
-input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
-  outline: 3px solid rgba(47, 107, 92, 0.28);
-  outline-offset: 2px;
-}
-.hidden { display: none !important; }
-.page-shell {
-  width: min(1200px, calc(100% - 2rem));
-  margin: 0 auto;
-  padding-bottom: 3rem;
+async function apiRequest(path, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  const token = getSessionToken();
+
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = headers["Content-Type"] || "application/json";
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  } catch (error) {
+    throw new Error("Não foi possível comunicar com o servidor.");
+  }
+
+  let payload = {};
+  try {
+    payload = await response.json();
+  } catch (error) {
+    payload = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(payload.error || payload.message || "Falha inesperada.");
+  }
+
+  return payload;
 }
 
-.site-header {
-  position: sticky;
-  top: 1rem;
-  z-index: 20;
-  margin-top: 1rem;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 999px;
-  background: rgba(250, 252, 255, 0.82);
-  backdrop-filter: blur(18px);
-  box-shadow: var(--shadow);
+function showToast(type, message) {
+  const item = document.createElement("div");
+  item.className = `toast ${type}`;
+  item.textContent = message;
+  elements.toastStack.appendChild(item);
+  window.setTimeout(() => item.remove(), 4200);
 }
 
-.brand { display: inline-flex; align-items: center; gap: 0.9rem; }
-.brand-logo {
-  width: 4.1rem;
-  height: 4.1rem;
-  object-fit: contain;
-  border-radius: 0.35rem;
-  background: #1651aa;
-  box-shadow: 0 12px 28px rgba(22, 81, 170, 0.24);
-}
-.brand strong, h1, h2, h3 { font-family: var(--font-display); }
-.brand span { display: flex; flex-direction: column; }
-.brand small { color: var(--muted); }
-.site-nav { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
-.site-nav a { padding: 0.45rem 0.85rem; border-radius: 999px; color: var(--muted); }
-.site-nav a:hover { background: rgba(22, 81, 170, 0.08); color: var(--brand-deep); }
-.header-actions { display: flex; gap: 0.75rem; align-items: center; }
-
-.primary-btn, .secondary-btn, .ghost-btn, .action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.9rem;
-  padding: 0.8rem 1.25rem;
-  border-radius: 999px;
-  border: none;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease;
-}
-.primary-btn {
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
-  color: #fff;
-  box-shadow: 0 16px 28px rgba(22, 81, 170, 0.24);
-}
-.secondary-btn, .ghost-btn { background: rgba(255, 255, 255, 0.72); color: var(--text); border: 1px solid var(--line); }
-.primary-btn:hover, .secondary-btn:hover, .ghost-btn:hover, .slot-btn:hover:not(:disabled), .action-btn:hover { transform: translateY(-2px); }
-
-.hero-section, .content-section, .contact-card {
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-.hero-section {
-  display: grid;
-  grid-template-columns: 1.45fr 0.95fr;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-  padding: 2rem;
-  border-radius: var(--radius-xl);
-}
-.hero-copy h1 { margin: 0 0 1rem; font-size: clamp(2.5rem, 5vw, 4.8rem); line-height: 0.95; }
-.hero-text, .story-card p, .service-card p, .professional-card p, .booking-summary p, .contact-card p, .appointment-card p {
-  color: var(--muted);
-  line-height: 1.6;
-}
-.eyebrow, .panel-label, .summary-label {
-  margin: 0 0 0.75rem;
-  color: var(--brand);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.hero-actions, .contact-actions, .appointment-actions { display: flex; gap: 0.85rem; flex-wrap: wrap; }
-.hero-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 2rem;
-}
-.hero-metrics article, .story-card, .service-card, .professional-card, .booking-summary, .booking-form, .appointment-card, .empty-card, .contact-card, .hero-panel {
-  border-radius: var(--radius-lg);
-}
-.hero-metrics article, .story-card, .service-card, .professional-card, .appointment-card, .empty-card {
-  padding: 1.35rem;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.74);
-}
-.hero-metrics strong { display: block; margin-bottom: 0.35rem; font-size: 1.9rem; color: var(--brand-deep); }
-.hero-panel {
-  padding: 1.5rem;
-  background: linear-gradient(180deg, rgba(22, 81, 170, 0.08) 0%, rgba(255, 255, 255, 0.92) 65%, rgba(118, 255, 3, 0.08) 100%);
-  border: 1px solid rgba(22, 81, 170, 0.16);
-}
-.journey-list { margin: 0; padding-left: 1.25rem; line-height: 1.8; }
-.status-card {
-  display: flex;
-  gap: 0.9rem;
-  align-items: flex-start;
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(22, 81, 170, 0.18);
-}
-.status-dot {
-  width: 0.8rem;
-  height: 0.8rem;
-  margin-top: 0.35rem;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 0.45rem rgba(118, 255, 3, 0.18);
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-.content-section {
-  margin-top: 1.5rem;
-  padding: 1.75rem;
-  border-radius: var(--radius-xl);
-}
-.section-heading { max-width: 48rem; margin-bottom: 1.3rem; }
-.section-heading h2 { margin: 0; font-size: clamp(1.8rem, 3vw, 2.6rem); }
-.story-grid, .services-grid, .professionals-grid, .appointments-list { display: grid; gap: 1rem; }
-.story-grid, .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.professionals-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-.appointments-list { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-.professional-card .card-top { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--brand-deep);
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-.professional-meta, .appointment-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
-.card-link { display: inline-flex; margin-top: 1rem; color: var(--brand); font-weight: 700; }
-
-.booking-layout { display: grid; grid-template-columns: 1.35fr 0.85fr; gap: 1rem; }
-.booking-form, .booking-summary { padding: 1.4rem; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.78); }
-.field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
-.field-label { display: block; margin-bottom: 0.75rem; font-weight: 700; }
-.slots-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
-.slot-btn {
-  min-height: 3rem;
-  padding: 0.75rem 0.85rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(22, 81, 170, 0.2);
-  background: #fff;
-  color: var(--text);
-}
-.slot-btn.selected { background: var(--brand); color: #fff; border-color: var(--brand); }
-.slot-btn:disabled { cursor: not-allowed; background: #dce6f8; color: rgba(20, 58, 132, 0.45); border-color: transparent; }
-.summary-list, .detail-list { margin: 1rem 0 0; padding-left: 1.2rem; color: var(--muted); line-height: 1.7; }
-.appointment-card { display: flex; flex-direction: column; gap: 0.8rem; }
-.appointment-card h3 { margin: 0; }
-.action-btn.primary { background: var(--brand); color: #fff; }
-.action-btn.danger { background: rgba(184, 64, 58, 0.12); color: var(--danger); }
-.contact-card { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1.5rem; }
-.site-footer { margin-top: 1.5rem; text-align: center; color: var(--muted); }
-
-.menu-toggle {
-  display: none;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  padding: 0.75rem 1rem;
-}
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgba(26, 16, 10, 0.44);
-}
-.modal-card {
-  position: relative;
-  width: min(100%, 32rem);
-  padding: 1.5rem;
-  border-radius: 1.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: var(--surface-strong);
-  box-shadow: var(--shadow);
-}
-.modal-video-card { width: min(100%, 70rem); }
-.modal-close { position: absolute; top: 1rem; right: 1rem; border: none; background: transparent; font-size: 1.8rem; color: var(--muted); }
-.modal-header h2 { margin: 0; }
-.tab-switch, .segmented-control { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem 0; }
-.tab-btn, .segment-btn {
-  min-height: 2.9rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: #fff;
-  color: var(--muted);
-}
-.tab-btn.active, .segment-btn.active { background: rgba(22, 81, 170, 0.1); color: var(--brand-deep); border-color: rgba(22, 81, 170, 0.22); }
-.stack-form, .professional-fields { display: grid; gap: 0.95rem; }
-.submit-btn { width: 100%; }
-.video-shell { min-height: 70vh; overflow: hidden; border-radius: var(--radius-md); background: #dce6f8; }
-.video-shell iframe { width: 100%; min-height: 70vh; border: 0; }
-.toast-stack {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 50;
-  display: grid;
-  gap: 0.75rem;
-  width: min(100%, 22rem);
-}
-.toast { padding: 1rem 1.1rem; border-radius: 1rem; color: #fff; box-shadow: var(--shadow); }
-.toast.success { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); }
-.toast.error { background: linear-gradient(135deg, var(--danger) 0%, #8e2c28 100%); }
-
-.hero-logo-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
+function isValidName(name) {
+  return name.trim().length >= 3;
 }
 
-.hero-logo {
-  width: min(100%, 14.5rem);
-  object-fit: contain;
-  border-radius: 0.75rem;
-  background: #1651aa;
-  box-shadow: 0 18px 40px rgba(22, 81, 170, 0.18);
+function isValidPhone(phone) {
+  return phone.replace(/\D/g, "").length >= 10;
 }
 
-@media (max-width: 980px) {
-  .hero-section, .booking-layout, .contact-card { grid-template-columns: 1fr; }
-  .story-grid, .services-grid { grid-template-columns: 1fr; }
-  .site-header { grid-template-columns: auto auto; }
-  .menu-toggle { display: inline-flex; justify-self: end; }
-  .site-nav { display: none; grid-column: 1 / -1; flex-direction: column; align-items: stretch; padding-top: 0.5rem; }
-  .site-nav.open { display: flex; }
-  .header-actions { grid-column: 1 / -1; justify-content: flex-end; }
+function isStrongPassword(password) {
+  return password.length >= 8;
 }
 
-@media (max-width: 720px) {
-  .page-shell { width: min(100%, calc(100% - 1rem)); }
-  .hero-section, .content-section { padding: 1.25rem; }
-  .hero-metrics, .field-grid, .slots-grid { grid-template-columns: 1fr; }
-  .site-header { border-radius: 1.5rem; }
-  .header-actions { flex-direction: column; align-items: stretch; }
-  .toast-stack { left: 0.75rem; right: 0.75rem; width: auto; }
+function isValidProfessionalDocument(council, documentId) {
+  const value = documentId.trim().toUpperCase();
+  const patterns = {
+    CFP: /^\d{2}\/\d{4,6}$/,
+    CFN: /^\d{4,6}(?:\/[A-Z]{2})?$/,
+  };
+  return Boolean(patterns[council] && patterns[council].test(value));
 }
+
+function setAuthTab(tab) {
+  const isLogin = tab === "login";
+  elements.tabLogin.classList.toggle("active", isLogin);
+  elements.tabRegister.classList.toggle("active", !isLogin);
+  elements.loginForm.classList.toggle("hidden", !isLogin);
+  elements.registerForm.classList.toggle("hidden", isLogin);
+  document.getElementById("authTitle").textContent = isLogin ? "Entrar" : "Criar conta";
+}
+
+function openModal(modal) {
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeModal(modal) {
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function updateHeader() {
+  if (state.user) {
+    elements.openAuthModal.textContent = `${state.user.nome.split(" ")[0]} | Sair`;
+    elements.dashboardShortcut.classList.remove("hidden");
+    elements.dashboardSection.classList.remove("hidden");
+  } else {
+    elements.openAuthModal.textContent = "Entrar";
+    elements.dashboardShortcut.classList.add("hidden");
+    elements.dashboardSection.classList.add("hidden");
+  }
+}
+
+function renderProfessionals() {
+  if (!state.professionals.length) {
+    elements.professionalsGrid.innerHTML = '<article class="empty-card">Nenhum profissional disponível.</article>';
+    return;
+  }
+
+  const pageMap = {
+    "mariana-souza": "mariana.html",
+    "lucas-fernandes": "lucas.html",
+    "fernanda-lima": "fernanda.html",
+  };
+
+  elements.professionalsGrid.innerHTML = state.professionals
+    .map(
+      (item) => `
+        <article class="professional-card">
+          <div class="card-top">
+            <div>
+              <p class="eyebrow">${item.conselho}</p>
+              <h3>${item.nome}</h3>
+            </div>
+            <span class="chip">${item.registroProfissional}</span>
+          </div>
+          <p>${item.bio}</p>
+          <div class="professional-meta">
+            <span class="chip">${item.titulo}</span>
+            <span class="chip">${item.especialidades[0]}</span>
+          </div>
+          <a class="card-link" href="${pageMap[item.slug] || "#agenda"}">Ver perfil completo</a>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function renderSelectOptions() {
+  elements.professionalId.innerHTML = state.professionals
+    .map((item) => `<option value="${item.id}">${item.nome} | ${item.titulo}</option>`)
+    .join("");
+
+  elements.serviceSelect.innerHTML = Object.entries(state.services)
+    .map(([value, label]) => `<option value="${value}">${label}</option>`)
+    .join("");
+}
+
+function updateSummary() {
+  const professional = state.professionals.find(
+    (item) => String(item.id) === elements.professionalId.value,
+  );
+  const date = elements.appointmentDate.value;
+  const slot = state.selectedSlot;
+  const service = state.services[elements.serviceSelect.value];
+  const mode = state.modes[elements.modeSelect.value] || elements.modeSelect.value;
+
+  if (!professional || !date || !slot) {
+    elements.bookingSummary.innerHTML = `
+      <p class="summary-label">Resumo da escolha</p>
+      <h3>Nenhum horário selecionado</h3>
+      <p>Escolha um profissional, uma data e um horário para visualizar o resumo.</p>
+      <ul class="summary-list">
+        <li>Login necessário para concluir o agendamento.</li>
+        <li>Horários bloqueados automaticamente quando já reservados.</li>
+        <li>Consultas online abrem em sala privada da plataforma.</li>
+      </ul>
+    `;
+    return;
+  }
+
+  elements.bookingSummary.innerHTML = `
+    <p class="summary-label">Resumo da escolha</p>
+    <h3>${professional.nome}</h3>
+    <p>${professional.titulo}</p>
+    <ul class="summary-list">
+      <li>Serviço: ${service}</li>
+      <li>Modalidade: ${mode}</li>
+      <li>Data: ${new Date(`${date}T00:00:00`).toLocaleDateString("pt-BR")}</li>
+      <li>Horário: ${slot}</li>
+    </ul>
+  `;
+}
+
+function renderSlots(slots) {
+  elements.slotsGrid.innerHTML = slots
+    .map(
+      (item) => `
+        <button
+          class="slot-btn ${item.hora === state.selectedSlot ? "selected" : ""}"
+          data-slot="${item.hora}"
+          type="button"
+          ${item.disponivel ? "" : "disabled"}
+        >
+          ${item.hora}
+        </button>
+      `,
+    )
+    .join("");
+
+  elements.slotsGrid.querySelectorAll("[data-slot]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedSlot = button.dataset.slot;
+      renderSlots(slots);
+      updateSummary();
+    });
+  });
+}
+
+async function refreshAvailability() {
+  const professionalId = elements.professionalId.value;
+  const date = elements.appointmentDate.value;
+
+  if (!professionalId || !date) {
+    state.selectedSlot = "";
+    renderSlots([]);
+    updateSummary();
+    return;
+  }
+
+  try {
+    const payload = await apiRequest(
+      `/availability?professionalId=${encodeURIComponent(professionalId)}&date=${encodeURIComponent(date)}`,
+      { method: "GET" },
+    );
+    state.selectedSlot = "";
+    renderSlots(payload.slots || []);
+    updateSummary();
+  } catch (error) {
+    state.selectedSlot = "";
+    renderSlots([]);
+    updateSummary();
+    showToast("error", error.message);
+  }
+}
+
+function fillBookingFormFromUser() {
+  if (!state.user) {
+    return;
+  }
+  elements.patientName.value = state.user.nome || "";
+  elements.patientEmail.value = state.user.email || "";
+}
+
+function renderAppointments() {
+  if (!state.user) {
+    elements.appointmentsList.innerHTML = '<article class="empty-card">Faça login para visualizar seus agendamentos.</article>';
+    return;
+  }
+
+  if (!state.appointments.length) {
+    elements.appointmentsList.innerHTML = '<article class="empty-card">Ainda não há consultas agendadas para esta conta.</article>';
+    return;
+  }
+
+  elements.appointmentsList.innerHTML = state.appointments
+    .map(
+      (item) => `
+        <article class="appointment-card">
+          <div>
+            <p class="eyebrow">Consulta agendada</p>
+            <h3>${item.professionalName}</h3>
+            <p>${item.professionalTitle}</p>
+          </div>
+          <div class="appointment-tags">
+            <span class="chip">${state.services[item.servico] || item.servico}</span>
+            <span class="chip">${state.modes[item.modalidade] || item.modalidade}</span>
+            <span class="chip">${item.data} às ${item.hora}</span>
+          </div>
+          <p>${item.observacoes || "Sem observações adicionais registradas."}</p>
+          <div class="appointment-actions">
+            <button class="action-btn primary" data-room="${item.roomName}" type="button">Entrar na sala</button>
+            <button class="action-btn danger" data-delete="${item.id}" type="button">Cancelar</button>
+          </div>
+        </article>
+      `,
+    )
+    .join("");
+
+  elements.appointmentsList.querySelectorAll("[data-room]").forEach((button) => {
+    button.addEventListener("click", () => openVideoRoom(button.dataset.room));
+  });
+
+  elements.appointmentsList.querySelectorAll("[data-delete]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const confirmed = window.confirm("Deseja realmente cancelar este agendamento?");
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        await apiRequest(`/appointments/${button.dataset.delete}`, { method: "DELETE" });
+        showToast("success", "Agendamento cancelado com sucesso.");
+        await loadAppointments();
+        await refreshAvailability();
+      } catch (error) {
+        showToast("error", error.message);
+      }
+    });
+  });
+}
+
+function openVideoRoom(roomName) {
+  elements.videoShell.innerHTML = `
+    <iframe
+      src="https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false"
+      title="Sala de consulta online"
+      allow="camera; microphone; fullscreen; display-capture"
+    ></iframe>
+  `;
+  openModal(elements.videoModal);
+}
+
+async function loadProfessionals() {
+  const payload = await apiRequest("/professionals", { method: "GET" });
+  state.professionals = payload.professionals || [];
+  state.services = payload.services || {};
+  state.modes = payload.modes || {};
+  renderProfessionals();
+  renderSelectOptions();
+  updateSummary();
+}
+
+async function loadSession() {
+  const token = getSessionToken();
+  if (!token) {
+    state.user = null;
+    updateHeader();
+    fillBookingFormFromUser();
+    renderAppointments();
+    return;
+  }
+
+  try {
+    const payload = await apiRequest("/me", { method: "GET" });
+    state.user = payload.user;
+    updateHeader();
+    fillBookingFormFromUser();
+    await loadAppointments();
+  } catch (error) {
+    setSessionToken(null);
+    state.user = null;
+    updateHeader();
+    renderAppointments();
+  }
+}
+
+async function loadAppointments() {
+  if (!state.user) {
+    state.appointments = [];
+    renderAppointments();
+    return;
+  }
+
+  const payload = await apiRequest("/appointments", { method: "GET" });
+  state.appointments = payload.appointments || [];
+  renderAppointments();
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!isValidEmail(email)) {
+    showToast("error", "Digite um email válido.");
+    return;
+  }
+  if (!password) {
+    showToast("error", "Digite a sua senha.");
+    return;
+  }
+
+  try {
+    const payload = await apiRequest("/login", {
+      method: "POST",
+      body: JSON.stringify({ email, senha: password }),
+    });
+    setSessionToken(payload.token);
+    state.user = payload.user;
+    updateHeader();
+    fillBookingFormFromUser();
+    await loadAppointments();
+    closeModal(elements.authModal);
+    showToast("success", "Login realizado com sucesso.");
+  } catch (error) {
+    showToast("error", error.message);
+  }
+}
+
+async function handleRegister(event) {
+  event.preventDefault();
+  const role = elements.registerRole.value;
+  const name = document.getElementById("registerName").value.trim();
+  const email = document.getElementById("registerEmail").value.trim();
+  const password = document.getElementById("registerPassword").value;
+  const council = document.getElementById("registerCouncil").value;
+  const documentId = document.getElementById("registerDocument").value.trim().toUpperCase();
+
+  if (!isValidName(name)) {
+    showToast("error", "Informe um nome com pelo menos 3 caracteres.");
+    return;
+  }
+  if (!isValidEmail(email)) {
+    showToast("error", "Informe um email válido.");
+    return;
+  }
+  if (!isStrongPassword(password)) {
+    showToast("error", "A senha deve ter pelo menos 8 caracteres.");
+    return;
+  }
+  if (role === "profissional" && (!council || !isValidProfessionalDocument(council, documentId))) {
+    showToast("error", "Informe conselho e registro profissional válidos.");
+    return;
+  }
+
+  try {
+    await apiRequest("/register", {
+      method: "POST",
+      body: JSON.stringify({
+        nome: name,
+        email,
+        senha: password,
+        tipo: role,
+        conselho: role === "profissional" ? council : null,
+        registroProfissional: role === "profissional" ? documentId : null,
+      }),
+    });
+    setAuthTab("login");
+    elements.registerForm.reset();
+    setRole("cliente");
+    showToast("success", "Cadastro criado. Faça login para continuar.");
+  } catch (error) {
+    showToast("error", error.message);
+  }
+}
+
+async function handleBooking(event) {
+  event.preventDefault();
+
+  if (!state.user) {
+    openModal(elements.authModal);
+    setAuthTab("login");
+    showToast("error", "Faça login para concluir o agendamento.");
+    return;
+  }
+
+  const payload = {
+    professionalId: elements.professionalId.value,
+    servico: elements.serviceSelect.value,
+    modalidade: elements.modeSelect.value,
+    data: elements.appointmentDate.value,
+    hora: state.selectedSlot,
+    nome: elements.patientName.value.trim(),
+    email: elements.patientEmail.value.trim(),
+    telefone: elements.patientPhone.value.trim(),
+    observacoes: elements.appointmentNotes.value.trim(),
+  };
+
+  if (!payload.data || !payload.hora) {
+    showToast("error", "Selecione uma data e um horário disponível.");
+    return;
+  }
+  if (!isValidName(payload.nome)) {
+    showToast("error", "Informe um nome válido.");
+    return;
+  }
+  if (!isValidEmail(payload.email)) {
+    showToast("error", "Informe um email válido.");
+    return;
+  }
+  if (!isValidPhone(payload.telefone)) {
+    showToast("error", "Informe um telefone válido.");
+    return;
+  }
+
+  try {
+    await apiRequest("/appointments", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    showToast("success", "Agendamento confirmado com sucesso.");
+    elements.bookingForm.reset();
+    fillBookingFormFromUser();
+    state.selectedSlot = "";
+    updateSummary();
+    await loadAppointments();
+    await refreshAvailability();
+  } catch (error) {
+    showToast("error", error.message);
+  }
+}
+
+async function handleAuthButton() {
+  if (!state.user) {
+    openModal(elements.authModal);
+    setAuthTab("login");
+    return;
+  }
+
+  try {
+    await apiRequest("/logout", { method: "POST" });
+  } catch (error) {
+  }
+
+  setSessionToken(null);
+  state.user = null;
+  state.appointments = [];
+  updateHeader();
+  renderAppointments();
+  showToast("success", "Sessão encerrada.");
+}
+
+function setRole(role) {
+  elements.registerRole.value = role;
+  elements.roleButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.role === role);
+  });
+  elements.professionalFields.classList.toggle("hidden", role !== "profissional");
+}
+
+function registerEvents() {
+  elements.menuToggle.addEventListener("click", () => {
+    const isOpen = elements.menuNav.classList.toggle("open");
+    elements.menuToggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.querySelectorAll(".site-nav a").forEach((link) => {
+    link.addEventListener("click", () => {
+      elements.menuNav.classList.remove("open");
+      elements.menuToggle.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  elements.openAuthModal.addEventListener("click", handleAuthButton);
+  elements.closeAuthModal.addEventListener("click", () => closeModal(elements.authModal));
+  elements.closeVideoModal.addEventListener("click", () => {
+    elements.videoShell.innerHTML = "";
+    closeModal(elements.videoModal);
+  });
+  elements.tabLogin.addEventListener("click", () => setAuthTab("login"));
+  elements.tabRegister.addEventListener("click", () => setAuthTab("register"));
+  elements.loginForm.addEventListener("submit", handleLogin);
+  elements.registerForm.addEventListener("submit", handleRegister);
+  elements.bookingForm.addEventListener("submit", handleBooking);
+  elements.dashboardShortcut.addEventListener("click", () => {
+    document.getElementById("dashboardSection").scrollIntoView({ behavior: "smooth" });
+  });
+  elements.roleButtons.forEach((button) => {
+    button.addEventListener("click", () => setRole(button.dataset.role));
+  });
+  elements.professionalId.addEventListener("change", refreshAvailability);
+  elements.appointmentDate.addEventListener("change", refreshAvailability);
+  elements.serviceSelect.addEventListener("change", updateSummary);
+  elements.modeSelect.addEventListener("change", updateSummary);
+
+  [elements.authModal, elements.videoModal].forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        if (modal === elements.videoModal) {
+          elements.videoShell.innerHTML = "";
+        }
+        closeModal(modal);
+      }
+    });
+  });
+}
+
+async function init() {
+  registerEvents();
+  elements.appointmentDate.min = new Date().toISOString().split("T")[0];
+
+  try {
+    await loadProfessionals();
+    await loadSession();
+    await refreshAvailability();
+  } catch (error) {
+    showToast("error", error.message);
+  }
+}
+
+init();
